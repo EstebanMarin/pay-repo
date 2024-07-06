@@ -1,7 +1,6 @@
 package com.estebanmarin.livedemo.core
 
 import cats.effect.*
-import cats.syntax.all.*
 import cats.implicits.*
 import cats.*
 import org.apache.pekko.actor.typed.{Behavior, ActorSystem}
