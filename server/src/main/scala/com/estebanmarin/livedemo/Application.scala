@@ -20,6 +20,9 @@ import scala.concurrent.ExecutionContext.global
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.client.Client
 
+import cats.implicits._
+import cats.syntax.semigroupk._ // Import SemigroupK syntax
+
 object Application extends IOApp.Simple {
   def makePostgres: Resource[IO, Transactor[IO] { type A = HikariDataSource }] = for {
     ec <- ExecutionContexts.fixedThreadPool[IO](32)
@@ -38,17 +41,17 @@ object Application extends IOApp.Simple {
   def makeServer: Resource[IO, Server] = for {
     postgres: Transactor[IO] { type A = HikariDataSource } <-
       makePostgres
-    actorModel: ActorModel[IO] <- ActorModelLive.resource[IO]
-    jobs: JobsLive[IO]         <- JobsLive.resource[IO](postgres)
-    jobApi: JobRoutes[IO]      <- JobRoutes.resource[IO](jobs, actorModel)
-    // actorModel <- ActorModelLive.make[IO]
-    // acort      <- actorModel.demoSimpleActor
+    actorModel: ActorModel[IO]          <- ActorModelLive.resource[IO]
+    jobs: JobsLive[IO]                  <- JobsLive.resource[IO](postgres)
+    jobApi: JobRoutes[IO]               <- JobRoutes.resource[IO](jobs)
+    actorModelApi: ActorModelRoutes[IO] <- ActorModelRoutes.resource[IO](actorModel)
 
+    routesAll = jobApi.routes <+> actorModelApi.routes
     server <- EmberServerBuilder
       .default[IO]
       .withHost(host"0.0.0.0")
       .withPort(port"4041")
-      .withHttpApp(CORS(jobApi.routes.orNotFound))
+      .withHttpApp(CORS(routesAll.orNotFound))
       .build
   } yield server
 

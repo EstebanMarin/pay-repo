@@ -20,7 +20,21 @@ class ActorModelLive[F[_]: Applicative] extends ActorModel[F] {
     Behaviors.same
   })
 
-  val simpleActor: ActorSystem[String] = ActorSystem(simpleActorBehavior, "simpleActor")
+  object SimpleActorBehavior {
+    def apply(): Behavior[String] = Behaviors.receiveMessage((msg: String) => {
+      println(s"Received message: Actor")
+      Behaviors.same
+    })
+  }
+
+//   object SimpleActorBehavior2 {
+//     def apply(): Behavior[String] = Behaviors.receive((context, msg) => {
+//       println(s"Received message: Actor")
+//       Behaviors.same})
+//     }
+//  }
+
+  val simpleActor: ActorSystem[String] = ActorSystem(SimpleActorBehavior(), "simpleActor")
 
   def demoSimpleActor: F[Unit] = {
     // part 2 instanciate an actor system

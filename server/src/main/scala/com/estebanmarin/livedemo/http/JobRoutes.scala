@@ -13,8 +13,7 @@ import com.estebanmarin.livedemo.core.*
 import com.estebanmarin.livedemo.domain.job.*
 import org.http4s.server.Router
 
-class JobRoutes[F[_]: Concurrent] private (jobs: Jobs[F], actorM: ActorModel[F])
-    extends Http4sDsl[F] {
+class JobRoutes[F[_]: Concurrent] private (jobs: Jobs[F]) extends Http4sDsl[F] {
   private val prefix = "/jobs"
 
   private val createJobRoute: HttpRoutes[F] = HttpRoutes.of[F] {
@@ -24,11 +23,6 @@ class JobRoutes[F[_]: Concurrent] private (jobs: Jobs[F], actorM: ActorModel[F])
         id   <- jobs.create(job)
         resp <- Created(id)
       } yield resp
-    case _ @GET -> Root / "actorModel" =>
-      for {
-        _        <- actorM.demoSimpleActor
-        response <- Ok("actorModel")
-      } yield response
   }
 
   // get /jobs
@@ -42,6 +36,6 @@ class JobRoutes[F[_]: Concurrent] private (jobs: Jobs[F], actorM: ActorModel[F])
 }
 
 object JobRoutes {
-  def resource[F[_]: Concurrent](jobs: Jobs[F], actorM: ActorModel[F]): Resource[F, JobRoutes[F]] =
-    Resource.pure(new JobRoutes[F](jobs, actorM))
+  def resource[F[_]: Concurrent](jobs: Jobs[F]): Resource[F, JobRoutes[F]] =
+    Resource.pure(new JobRoutes[F](jobs))
 }
