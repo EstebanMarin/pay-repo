@@ -36,9 +36,14 @@ object Application extends IOApp.Simple {
     EmberClientBuilder.default[IO].build
 
   def makeServer: Resource[IO, Server] = for {
-    postgres <- makePostgres
-    jobs     <- JobsLive.resource[IO](postgres)
-    jobApi   <- JobRoutes.resource[IO](jobs)
+    postgres: Transactor[IO] { type A = HikariDataSource } <-
+      makePostgres
+    actorModel: ActorModel[IO] <- ActorModelLive.resource[IO]
+    jobs: JobsLive[IO]         <- JobsLive.resource[IO](postgres)
+    jobApi: JobRoutes[IO]      <- JobRoutes.resource[IO](jobs, actorModel)
+    // actorModel <- ActorModelLive.make[IO]
+    // acort      <- actorModel.demoSimpleActor
+
     server <- EmberServerBuilder
       .default[IO]
       .withHost(host"0.0.0.0")
