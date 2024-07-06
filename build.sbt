@@ -1,7 +1,15 @@
 ThisBuild / version := "1.0.0"
-
+ThisBuild / scalacOptions += "-Wunused:all"
 lazy val estebanmarin  = "com.estebanmarin"
 lazy val scala3Version = "3.3.1"
+
+inThisBuild(
+  List(
+    scalaVersion      := "3.3.1",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
+  )
+)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Common - contains domain model

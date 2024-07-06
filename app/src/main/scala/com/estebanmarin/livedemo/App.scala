@@ -7,7 +7,6 @@ import cats.effect.*
 import tyrian.*
 import tyrian.Html.*
 import tyrian.http.*
-import io.circe.syntax.*
 import io.circe.parser.*
 import io.circe.generic.auto.*
 

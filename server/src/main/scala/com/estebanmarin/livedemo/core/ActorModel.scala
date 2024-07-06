@@ -6,7 +6,6 @@ import cats.implicits.*
 import cats.*
 import org.apache.pekko.actor.typed.{Behavior, ActorSystem}
 import org.apache.pekko.actor.typed.scaladsl.Behaviors
-import org.checkerframework.checker.units.qual.m
 
 trait ActorModel[F[_]] {
   def useActorModel: F[String]
@@ -57,18 +56,22 @@ class ActorModelLive[F[_]: Monad] extends ActorModel[F] {
 
   // exercise
 
-  object Person {
+  object Person:
     def happy(): Behavior[String] = Behaviors.receive { (context, msg) =>
-      context.log.info(s"Happy: $msg")
-      Behaviors.same
+      context.log.info(s"Logging from Happy: $msg")
+      msg match {
+        case "pekko sad" => sad()
+        case _           => Behaviors.same
+      }
     }
 
     def sad(): Behavior[String] = Behaviors.receive { (context, msg) =>
       context.log.info(s"Sad: $msg")
-      Behaviors.same
+      msg match {
+        case "pekko happy" => happy()
+        case _             => Behaviors.same
+      }
     }
-  }
-
   def useActorModel: F[String] = "use ActorModel".pure[F]
 }
 

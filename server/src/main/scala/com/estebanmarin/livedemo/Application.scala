@@ -15,13 +15,11 @@ import org.http4s.server.Server
 
 import cats.effect.IO
 import cats.effect.Resource
-import scala.concurrent.ExecutionContext.global
 
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.client.Client
 
 import cats.implicits._
-import cats.syntax.semigroupk._ // Import SemigroupK syntax
 
 object Application extends IOApp.Simple {
   def makePostgres: Resource[IO, Transactor[IO] { type A = HikariDataSource }] = for {
@@ -39,7 +37,7 @@ object Application extends IOApp.Simple {
     EmberClientBuilder.default[IO].build
 
   def makeServer: Resource[IO, Server] = for {
-    postgres: Transactor[IO] { type A = HikariDataSource } <-
+    postgres: Transactor[IO] <-
       makePostgres
     actorModel: ActorModel[IO]          <- ActorModelLive.resource[IO]
     jobs: JobsLive[IO]                  <- JobsLive.resource[IO](postgres)
