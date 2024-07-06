@@ -27,19 +27,46 @@ class ActorModelLive[F[_]: Applicative] extends ActorModel[F] {
     })
   }
 
-//   object SimpleActorBehavior2 {
-//     def apply(): Behavior[String] = Behaviors.receive((context, msg) => {
-//       println(s"Received message: Actor")
-//       Behaviors.same})
-//     }
-//  }
+  object SimpleActorBehavior_v2 {
+    def apply(): Behavior[String] = Behaviors.receive((context, msg) => {
+      // println(s"Received message: Actor")
+      context.log.info(s"Received message: $msg")
+      Behaviors.same
+    })
+  }
 
-  val simpleActor: ActorSystem[String] = ActorSystem(SimpleActorBehavior(), "simpleActor")
+  object SimpleActorBehavior_v3 {
+    def apply(): Behavior[String] = Behaviors.setup { context =>
+      context.log.info("SimpleActor started")
+      // first message
+      Behaviors.receiveMessage((msg: String) => {
+        context.log.info(s"Received message: $msg")
+        Behaviors.same
+      })
+    }
+  }
+
+  // val simpleActor: ActorSystem[String] = ActorSystem(SimpleActorBehavior_v3(), "simpleActor")
+  val simpleActor: ActorSystem[String] = ActorSystem(Person.happy(), "simpleActor")
 
   def demoSimpleActor: F[Unit] = {
     // part 2 instanciate an actor system
     // part 3 send a message to the actor
     (simpleActor ! "Hello, World!").pure[F]
+  }
+
+  // exercise
+
+  object Person {
+    def happy(): Behavior[String] = Behaviors.receive { (context, msg) =>
+      context.log.info(s"Happy: $msg")
+      Behaviors.same
+    }
+
+    def sad(): Behavior[String] = Behaviors.receive { (context, msg) =>
+      context.log.info(s"Sad: $msg")
+      Behaviors.same
+    }
   }
 
   def useActorModel: F[String] = "use ActorModel".pure[F]
